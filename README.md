@@ -30,7 +30,7 @@ Here are 6 different robotic manipulation tasks trained with PPO. Each video sho
 <b>Lift Cube - Franka</b>
 <br/>
 <video width="200" height="200" controls>
-<source src="../outputs/Isaac-Lift-Cube-Franka-v0/videos/304.mp4" type="video/mp4">
+<source src="outputs/Isaac-Lift-Cube-Franka-v0/videos/304.mp4" type="video/mp4">
 </video>
 <br/>
 <i>Franka robot lifting a cube off the ground</i>
@@ -39,7 +39,7 @@ Here are 6 different robotic manipulation tasks trained with PPO. Each video sho
 <b>Lift Cube - OpenArm</b>
 <br/>
 <video width="200" height="200" controls>
-<source src="../outputs/Isaac-Lift-Cube-OpenArm-v0/videos/304.mp4" type="video/mp4">
+<source src="outputs/Isaac-Lift-Cube-OpenArm-v0/videos/304.mp4" type="video/mp4">
 </video>
 <br/>
 <i>OpenArm robot lifting a cube off the ground</i>
@@ -48,7 +48,7 @@ Here are 6 different robotic manipulation tasks trained with PPO. Each video sho
 <b>Open Drawer - Franka</b>
 <br/>
 <video width="200" height="200" controls>
-<source src="../outputs/Isaac-Open-Drawer-Franka-v0/videos/304.mp4" type="video/mp4">
+<source src="outputs/Isaac-Open-Drawer-Franka-v0/videos/304.mp4" type="video/mp4">
 </video>
 <br/>
 <i>Franka robot opening a drawer</i>
@@ -59,7 +59,7 @@ Here are 6 different robotic manipulation tasks trained with PPO. Each video sho
 <b>Open Drawer - OpenArm</b>
 <br/>
 <video width="200" height="200" controls>
-<source src="../outputs/Isaac-Open-Drawer-OpenArm-v0/videos/304.mp4" type="video/mp4">
+<source src="outputs/Isaac-Open-Drawer-OpenArm-v0/videos/304.mp4" type="video/mp4">
 </video>
 <br/>
 <i>OpenArm robot opening a drawer</i>
@@ -68,7 +68,7 @@ Here are 6 different robotic manipulation tasks trained with PPO. Each video sho
 <b>Reach Franka</b>
 <br/>
 <video width="200" height="200" controls>
-<source src="../outputs/Isaac-Reach-Franka-v0/videos/304.mp4" type="video/mp4">
+<source src="outputs/Isaac-Reach-Franka-v0/videos/304.mp4" type="video/mp4">
 </video>
 <br/>
 <i>Franka robot reaching for a target location</i>
@@ -77,7 +77,7 @@ Here are 6 different robotic manipulation tasks trained with PPO. Each video sho
 <b>Reach OpenArm</b>
 <br/>
 <video width="200" height="200" controls>
-<source src="../outputs/Isaac-Reach-OpenArm-v0/videos/304.mp4" type="video/mp4">
+<source src="outputs/Isaac-Reach-OpenArm-v0/videos/304.mp4" type="video/mp4">
 </video>
 <br/>
 <i>OpenArm robot reaching for a target location</i>
