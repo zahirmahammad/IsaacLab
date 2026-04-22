@@ -1,4 +1,4 @@
-from isaaclab.app import AppLauncher
+from isaaclab.source.isaaclab.isaaclab.app import AppLauncher
 import gymnasium as gym
 import torch
 import imageio
@@ -11,8 +11,8 @@ app_launcher = AppLauncher(headless=True, enable_cameras=True)
 # app_launcher = AppLauncher(headless=True, enable_cameras=False)
 simulation_app = app_launcher.app
 
-import isaaclab_tasks  # noqa: F401
-from isaaclab_tasks.utils import load_cfg_from_registry
+import isaaclab.source.isaaclab_tasks.isaaclab_tasks as isaaclab_tasks  # noqa: F401
+from isaaclab.source.isaaclab_tasks.isaaclab_tasks.utils import load_cfg_from_registry
 
 LR = 5e-5  # Slightly increased learning rate
 DEVICE = "cuda"

@@ -13,13 +13,13 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Tuple, Dict
 
-from isaaclab.app import AppLauncher
+from isaaclab.source.isaaclab.isaaclab.app import AppLauncher
 
 # Launch Isaac Sim
 app_launcher = AppLauncher(headless=True, enable_cameras=True)
 simulation_app = app_launcher.app
 
-from isaaclab_tasks.utils import load_cfg_from_registry
+from isaaclab.source.isaaclab_tasks.isaaclab_tasks.utils import load_cfg_from_registry
 
 # ============================================================================
 # CONFIGURATION

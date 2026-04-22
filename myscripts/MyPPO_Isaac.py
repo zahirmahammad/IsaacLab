@@ -11,13 +11,13 @@ from pathlib import Path
 import argparse
 
 
-from isaaclab.app import AppLauncher
+from isaaclab.source.isaaclab.isaaclab.app import AppLauncher
 
 # Launch Isaac Sim
 app_launcher = AppLauncher(headless=True, enable_cameras=True)
 simulation_app = app_launcher.app
 
-from isaaclab_tasks.utils import load_cfg_from_registry
+from isaaclab.source.isaaclab_tasks.isaaclab_tasks.utils import load_cfg_from_registry
 
 
 # ===================================================================================
@@ -332,16 +332,70 @@ class PPOTrainer:
 
 class PPOEvals:
     def __init__(self, config: TrainingConfig):
-        pass
+        self.config = config
+
+        self.env = self._create_environment()
+
+
 
     def _create_environment(self) -> gym.Env:
-        pass
+        self.cfg = load_cfg_from_registry(self.config.env_name, "env_cfg_entry_point")
+        self.cfg.scene.num_envs = 1
+        self.add_camera_view()
+
+        env = gym.make(self.config.env_name, cfg=self.cfg, render_mode='rgb_array')
+        env = gym.wrappers.OrderEnforcing(env)
+        return env
+
+    def add_camera_view(self):
+        # adjust camera resolution and pose
+        self.cfg.viewer.resolution = (640, 480)
+        self.cfg.viewer.eye = (3.0, 3.0, 3.0)
+        self.cfg.viewer.lookat = (0.0, 1.0, 2.0)
+    
 
     def _run_inference(self) -> None:
-        pass
+        print(f"\n{'-'*60}")
+        print(f"Evaluation: {self.config.env_name}")
+        print(f"{'-'*60}")
+        frames = []
+        for episode in range(5):
+            obs, _ = self.env.reset()
+            obs = obs["policy"]
+            total_reward = 0
+            
+            for _ in range(self.config.timesteps):
+                with torch.no_grad():
+                    obs_norm = self.agent.normalize_obs(obs)
+                    action = self.agent.actor_net(obs_norm)
+                
+                obs, reward, terminated, truncated, _ = self.env.step(action)
+                obs = obs["policy"]
+                total_reward += reward
+                
+                frame = self.env.render()
+                frame = (frame * 255).astype('uint8') if frame.dtype != 'uint8' else frame
+                frame = np.ascontiguousarray(frame)
+                cv2.putText(frame, f"Episode: {episode}", (20, 40),
+                           cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
+                frames.append(frame)
+            
+            print(f"Episode {episode+1}: Reward = {total_reward.mean().item():.4f}")
+        
+        # Save video and checkpoint
+        video_path = f"{self.config.output_dir}/videos"
+        model_path = f"{self.config.output_dir}/models"
 
-    def _save_video(self, frames: np.array, episode: str) -> None:
-        pass
+        Path(video_path).mkdir(parents=True, exist_ok=True)
+        Path(model_path).mkdir(parents=True, exist_ok=True)
+
+        imageio.mimsave(f"{video_path}/eval.mp4", frames, fps=30)
+        torch.save(self.agent.state_dict(), f"{model_path}/eval.pth")
+        
+        print(f"✓ Video saved: {video_path}")
+        print(f"✓ Model saved: {model_path}\n")
+
+
 
 
 
@@ -354,17 +408,17 @@ def main():
                        help="Run mode: train or test")
     args = parser.parse_args()
     
-    print(f"This is the fking env: {args.env}")
     # Create config with command-line env_name
     config = TrainingConfig(env_name=args.env)
-    ppotrainer = PPOTrainer(config)
-    
+
     if args.mode == "train":
         print(f"\n🚀 Starting TRAINING mode with {args.env}")
+        ppotrainer = PPOTrainer(config)
         ppotrainer.train()
     else:
         print(f"\n🎮 Starting TEST mode with {args.env}")
-        ppotrainer.evaluate(0)
+        ppotester = PPOEvals(config)
+        ppotester._run_inference()
     
     simulation_app.close()
 
