@@ -18,6 +18,10 @@ app_launcher = AppLauncher(headless=True, enable_cameras=True)
 simulation_app = app_launcher.app
 
 from isaaclab.source.isaaclab_tasks.isaaclab_tasks.utils import load_cfg_from_registry
+import isaaclab.sim as sim_utils
+from isaaclab.sensors import CameraCfg
+from pxr import UsdGeom, Gf
+import omni.usd
 
 
 # ===================================================================================
@@ -336,23 +340,56 @@ class PPOEvals:
 
         self.env = self._create_environment()
 
+        self.obs_dim = self.env.observation_space["policy"].shape[1]
+        self.action_dim = self.env.action_space.shape[1]
+
+        model_path = f"{self.config.output_dir}/models/304.pth"
+        self.agent = Agent(self.obs_dim, self.action_dim).to(self.config.device)
+        self.agent.load_state_dict(torch.load(model_path, map_location=self.config.device))
+
+
 
 
     def _create_environment(self) -> gym.Env:
         self.cfg = load_cfg_from_registry(self.config.env_name, "env_cfg_entry_point")
         self.cfg.scene.num_envs = 1
-        self.add_camera_view()
+
+        self.cfg.scene.follow_cam = CameraCfg(
+            prim_path="{ENV_REGEX_NS}/follow_cam",   # 👈 NOT on robot
+            update_period=0.0,
+            height=720,
+            width=720,
+            data_types=["rgb"],
+            spawn=sim_utils.PinholeCameraCfg(
+                focal_length=24.0,
+                focus_distance=400.0,
+                horizontal_aperture=20.955,
+            ),
+        )
 
         env = gym.make(self.config.env_name, cfg=self.cfg, render_mode='rgb_array')
         env = gym.wrappers.OrderEnforcing(env)
         return env
 
-    def add_camera_view(self):
-        # adjust camera resolution and pose
-        self.cfg.viewer.resolution = (640, 480)
-        self.cfg.viewer.eye = (3.0, 3.0, 3.0)
-        self.cfg.viewer.lookat = (0.0, 1.0, 2.0)
-    
+    def _setup_camera(self, eye, target):
+        """Camera will be handled by environment's built-in rendering"""
+        self.cfg.viewer.eye = tuple(map(float, eye))
+        self.cfg.viewer.lookat = tuple(map(float, target))
+
+
+
+    def update_follow_cam(self, eye, target):
+        stage = omni.usd.get_context().get_stage()
+        cam_prim = stage.GetPrimAtPath("/World/envs/env_0/follow_cam")
+        xform = UsdGeom.Xformable(cam_prim)
+        xform.ClearXformOpOrder()
+        eye = Gf.Vec3d(*map(float, eye))
+        target = Gf.Vec3d(*map(float, target))
+        up = Gf.Vec3d(0.0, 0.0, 1.0)
+        view = Gf.Matrix4d().SetLookAt(eye, target, up)
+        xform.AddTransformOp().Set(view.GetInverse())
+
+
 
     def _run_inference(self) -> None:
         print(f"\n{'-'*60}")
@@ -363,17 +400,32 @@ class PPOEvals:
             obs, _ = self.env.reset()
             obs = obs["policy"]
             total_reward = 0
-            
-            for _ in range(self.config.timesteps):
+
+            robot = self.env.unwrapped.scene["robot"]
+            pose = robot.data.root_state_w
+            print(f"{'='*60}")
+            print(f"Episode: {episode+1}")
+            print(f"Current Robot Position: {pose[:, :3]}")
+            print(f"{'-'*60}")
+
+            for step in range(self.config.timesteps):
                 with torch.no_grad():
                     obs_norm = self.agent.normalize_obs(obs)
                     action = self.agent.actor_net(obs_norm)
-                
-                obs, reward, terminated, truncated, _ = self.env.step(action)
+
+                obs, reward, terminated, truncated, info = self.env.step(action)
                 obs = obs["policy"]
                 total_reward += reward
-                
-                frame = self.env.render()
+            
+                pose = robot.data.root_state_w
+                target = pose[0, :3].cpu().numpy()
+                eye = target + [-3.0, -2.0, 1.5]
+                self.update_follow_cam(eye, target)
+
+                cam = self.env.unwrapped.scene["follow_cam"]
+                frame = cam.data.output["rgb"][0].cpu().numpy()
+
+                # frame = self.env.render()
                 frame = (frame * 255).astype('uint8') if frame.dtype != 'uint8' else frame
                 frame = np.ascontiguousarray(frame)
                 cv2.putText(frame, f"Episode: {episode}", (20, 40),
@@ -394,6 +446,8 @@ class PPOEvals:
         
         print(f"✓ Video saved: {video_path}")
         print(f"✓ Model saved: {model_path}\n")
+
+        self.env.close()
 
 
 
