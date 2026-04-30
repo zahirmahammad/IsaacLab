@@ -22,7 +22,7 @@ import isaaclab.sim as sim_utils
 from isaaclab.sensors import CameraCfg
 from pxr import UsdGeom, Gf
 import omni.usd
-
+from isaaclab.assets import AssetBaseCfg
 
 # ===================================================================================
 # CONFIGURATION CLASS
@@ -33,6 +33,7 @@ class TrainingConfig:
     env_name: str
     num_envs: int = 256
     timesteps: int = 256
+    num_eval_envs: int = 20
     device: str = "cuda"
 
     # Training Hyperparameters
@@ -307,12 +308,12 @@ class PPOTrainer:
                 obs = obs["policy"]
                 total_reward += reward
                 
-                frame = self.env.render()
-                frame = (frame * 255).astype('uint8') if frame.dtype != 'uint8' else frame
-                frame = np.ascontiguousarray(frame)
-                cv2.putText(frame, f"Episode: {episode}", (20, 40),
-                           cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
-                frames.append(frame)
+                # frame = self.env.render()
+                # frame = (frame * 255).astype('uint8') if frame.dtype != 'uint8' else frame
+                # frame = np.ascontiguousarray(frame)
+                # cv2.putText(frame, f"Episode: {episode}", (20, 40),
+                #            cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
+                # frames.append(frame)
             
             print(f"Episode {episode+1}: Reward = {total_reward.mean().item():.4f}")
         
@@ -323,7 +324,7 @@ class PPOTrainer:
         Path(video_path).mkdir(parents=True, exist_ok=True)
         Path(model_path).mkdir(parents=True, exist_ok=True)
 
-        imageio.mimsave(f"{video_path}/{run}.mp4", frames, fps=30)
+        # imageio.mimsave(f"{video_path}/{run}.mp4", frames, fps=30)
         torch.save(self.agent.state_dict(), f"{model_path}/{run}.pth")
         
         print(f"✓ Video saved: {video_path}")
@@ -357,15 +358,37 @@ class PPOEvals:
         self.cfg.scene.follow_cam = CameraCfg(
             prim_path="{ENV_REGEX_NS}/follow_cam",   # 👈 NOT on robot
             update_period=0.0,
-            height=720,
-            width=720,
+            height=1080,
+            width=1080,
             data_types=["rgb"],
             spawn=sim_utils.PinholeCameraCfg(
                 focal_length=24.0,
                 focus_distance=400.0,
+                # focal_length=50.0,          # 👈 tighter, less distortion
+                # focus_distance=200.0,         # 👈 realistic (not 400)
                 horizontal_aperture=20.955,
             ),
         )
+
+        # ambient (dome)
+        self.cfg.scene.dome_light = AssetBaseCfg(
+            prim_path="/World/DomeLight",
+            spawn=sim_utils.DomeLightCfg(
+                intensity=200.0,
+                color=(0.9, 0.9, 0.9),
+            ),
+        )
+
+        # directional (sun)
+        self.cfg.scene.sun_light = AssetBaseCfg(
+            prim_path="/World/SunLight",
+            spawn=sim_utils.DistantLightCfg(
+                intensity=2000.0,
+                angle=0.5,
+            ),
+        )
+        # self.cfg.scene.dome_light.intensity = 3000.0
+        # self.cfg.scene.dome_light.color = (1.0, 1.0, 1.0)
 
         env = gym.make(self.config.env_name, cfg=self.cfg, render_mode='rgb_array')
         env = gym.wrappers.OrderEnforcing(env)
