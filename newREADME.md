@@ -34,8 +34,7 @@ uv run myscripts/MyPPO_Isaac.py --env "$ENV_NAME"
 uv run myscripts/MyPPO_Isaac.py --env "$ENV_NAME" --mode test
 ```
 
-| | |
-|----------|----------|
-| ![A1 Flat Walk](gifs/A1FlatWalk.gif) | ![Digit Flat Walk](gifs/DigitFlatWalk.gif) |
-| ![Franka Open Drawer](gifs/FrankaOpenDrawer.gif) | ![G1 Flat Walk](gifs/G1FlatWalk.gif) |
-| ![Panda Lift](gifs/PandaLift.gif) | ![Spot Flat](gifs/SpotFlat.gif) |
+| | | |
+|----------|----------|----------|
+| ![A1 Flat Walk](gifs/A1FlatWalk.gif) | ![Digit Flat Walk](gifs/DigitFlatWalk.gif) | ![Franka Open Drawer](gifs/FrankaOpenDrawer.gif) |
+| ![G1 Flat Walk](gifs/G1FlatWalk.gif) | ![Panda Lift](gifs/PandaLift.gif) | ![Spot Flat](gifs/SpotFlat.gif) |
