@@ -3,13 +3,13 @@
 <table>
   <tr>
     <td><img src="gifs/AnymalWalk.gif"/></td>
-    <td><img src="gifs/DigitFlatWalk.gif"/></td>
+    <td><img src="gifs/SpotFlat.gif"/></td>
     <td><img src="gifs/FrankaOpenDrawer.gif"/></td>
   </tr>
   <tr>
     <td><img src="gifs/G1FlatWalk.gif"/></td>
+    <td><img src="gifs/DigitFlatWalk.gif"/></td>
     <td><img src="gifs/PandaLift.gif"/></td>
-    <td><img src="gifs/SpotFlat.gif"/></td>
   </tr>
 </table>
 
