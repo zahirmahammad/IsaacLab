@@ -12,7 +12,7 @@ import argparse
 
 
 from isaaclab.source.isaaclab.isaaclab.app import AppLauncher
-
+# import isaaclab_tasks
 # Launch Isaac Sim
 app_launcher = AppLauncher(headless=True, enable_cameras=True)
 simulation_app = app_launcher.app
@@ -384,7 +384,7 @@ class PPOEvals:
             prim_path="/World/SunLight",
             spawn=sim_utils.DistantLightCfg(
                 intensity=2000.0,
-                angle=0.5,
+                angle=0.3,
             ),
         )
         # self.cfg.scene.dome_light.intensity = 3000.0

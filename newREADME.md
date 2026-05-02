@@ -33,3 +33,5 @@ uv run myscripts/MyPPO_Isaac.py --env "$ENV_NAME"
 ```
 uv run myscripts/MyPPO_Isaac.py --env "$ENV_NAME" --mode test
 ```
+
+<video autoplay loop src="videos/A1FlatWalk.mp4" title="Title"></video>
