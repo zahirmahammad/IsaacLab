@@ -34,4 +34,8 @@ uv run myscripts/MyPPO_Isaac.py --env "$ENV_NAME"
 uv run myscripts/MyPPO_Isaac.py --env "$ENV_NAME" --mode test
 ```
 
-<video autoplay loop src="videos/A1FlatWalk.mp4" title="Title"></video>
+| | |
+|----------|----------|
+| ![A1 Flat Walk](gifs/A1FlatWalk.gif) | ![Digit Flat Walk](gifs/DigitFlatWalk.gif) |
+| ![Franka Open Drawer](gifs/FrankaOpenDrawer.gif) | ![G1 Flat Walk](gifs/G1FlatWalk.gif) |
+| ![Panda Lift](gifs/PandaLift.gif) | ![Spot Flat](gifs/SpotFlat.gif) |
